@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 #include "Model.hpp"
 #include "format.hpp"
+#include "AppConfig.hpp"
 
 #include <algorithm>
 #include <set>
@@ -714,6 +715,14 @@ DynamicPrintConfig PresetBundle::full_fff_config() const
     out.option<ConfigOptionStrings>("filament_settings_id", true)->values = this->filament_presets;
     out.option<ConfigOptionString >("printer_settings_id",  true)->value  = this->printers.get_selected_preset_name();
     out.option<ConfigOptionString >("physical_printer_settings_id", true)->value = this->physical_printers.get_selected_printer_name();
+  
+    // real filament cost loads from appconfig and is same for each alias of profile
+    if (app_config) {
+        std::string real_cost = app_config->get("real_filament_cost", this->filaments.get_selected_preset().alias);
+        if (!real_cost.empty() && real_cost != "0") {
+            out.option<ConfigOptionFloats>("filament_cost")->values.at(0) = std::atof(real_cost.c_str());
+        }
+    }
 
     // Serialize the collected "compatible_printers_condition" and "inherits" fields.
     // There will be 1 + num_exturders fields for "inherits" and 2 + num_extruders for "compatible_printers_condition" stored.

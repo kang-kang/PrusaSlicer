@@ -1058,12 +1058,21 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBools { false });
 
+    // we need to get currency shortcut from appconfig but its not initialized yet
+    // so the money/kg is just placeholder
     def = this->add("filament_cost", coFloats);
     def->label = L("Cost");
     def->tooltip = L("Enter your filament cost per kg here. This is only for statistical information.");
     def->sidetext = L("money/kg");
     def->min = 0;
     def->set_default_value(new ConfigOptionFloats { 0. });
+
+    def = this->add("real_filament_cost", coFloatAppConf);
+    def->label = L("Real Cost");
+    def->tooltip = L("Enter your current filament cost per kg here.");
+    def->sidetext = L("money/kg");
+    def->min = 0;
+    def->set_default_value(new ConfigOptionFloats{ 0. });
 
     def = this->add("filament_spool_weight", coFloats);
     def->label = L("Spool weight");

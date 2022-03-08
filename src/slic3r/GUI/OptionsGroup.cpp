@@ -60,6 +60,7 @@ const t_field& OptionsGroup::build_field(const t_config_option_key& id, const Co
 			case coPercents:
 			case coString:
 			case coStrings:
+            case coFloatAppConf:
                 m_fields.emplace(id, TextCtrl::Create<TextCtrl>(this->ctrl_parent(), opt, id));
                 break;
 			case coBool:
@@ -817,7 +818,6 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 	boost::any ret;
 	wxString text_value = wxString("");
 	const ConfigOptionDef* opt = config.def()->get(opt_key);
-
     if (opt->nullable)
     {
         switch (opt->type)
@@ -872,6 +872,12 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 		ret = double_to_string(val);
 		}
 		break;
+    case coFloatAppConf:{
+        std::string alias = get_edited_preset_const((Preset::Type)m_config_type).alias;
+        std::string str = get_app_config()->get(opt_key, alias);
+        ret = str.empty() ? double_to_string(opt->get_default_value<ConfigOptionFloats>()->get_at(0)) : str;
+        }
+        break;
 	case coString:
 		ret = from_u8(config.opt_string(opt_key));
 		break;
@@ -958,9 +964,8 @@ std::pair<OG_CustomCtrl*, bool*> ConfigOptionsGroup::get_custom_ctrl_with_blinki
 
 // Change an option on m_config, possibly call ModelConfig::touch().
 void ConfigOptionsGroup::change_opt_value(const t_config_option_key& opt_key, const boost::any& value, int opt_index /*= 0*/)
-
 {
-	Slic3r::GUI::change_opt_value(const_cast<DynamicPrintConfig&>(*m_config), opt_key, value, opt_index);
+	Slic3r::GUI::change_opt_value(const_cast<DynamicPrintConfig&>(*m_config), opt_key, value, opt_index, m_config_type);
 	if (m_modelconfig)
 		m_modelconfig->touch();
 }

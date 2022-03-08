@@ -23,13 +23,13 @@
 #include "AboutDialog.hpp"
 #include "MsgDialog.hpp"
 #include "format.hpp"
+#include "Field.hpp"
+#include "Tab.hpp"
 
+#include "libslic3r/AppConfig.hpp"
 #include "libslic3r/Print.hpp"
 
 namespace Slic3r {
-
-class AppConfig;
-
 namespace GUI {
 
 #if __APPLE__
@@ -99,7 +99,7 @@ const std::string& shortkey_alt_prefix()
 }
 
 // opt_index = 0, by the reason of zero-index in ConfigOptionVector by default (in case only one element)
-void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt_key, const boost::any& value, int opt_index /*= 0*/)
+void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt_key, const boost::any& value, int opt_index /*= 0*/, int preset_type /*= 0*/)
 {
 	try{
 
@@ -139,6 +139,15 @@ void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt
 			config.option<ConfigOptionFloats>(opt_key)->set_at(vec_new, opt_index, opt_index);
  			break;
 		}
+		case coFloatAppConf:
+			//preset_type 0 is INVALID
+			if (preset_type == 0) {
+				BOOST_LOG_TRIVIAL(error) << format("GUI::change_opt_value trying to change coFloatAppConf value for %1% with INVALID preset type.", opt_key);
+				break;
+			}
+			// dk: add controls to get_edited_preset?
+			get_app_config()->set(opt_key, get_edited_preset_const(Preset::Type(preset_type)).alias, boost::nowide::narrow(double_to_string(boost::any_cast<double>(value))));
+			break;
 		case coString:
 			config.set_key_value(opt_key, new ConfigOptionString(boost::any_cast<std::string>(value)));
 			break;
@@ -441,6 +450,15 @@ void combochecklist_set_flags(wxComboCtrl* comboCtrl, unsigned int flags)
 AppConfig* get_app_config()
 {
     return wxGetApp().app_config;
+}
+
+Preset& get_edited_preset(Preset::Type type)
+{
+	return wxGetApp().get_tab(type)->m_presets->get_edited_preset();
+}
+const Preset& get_edited_preset_const(Preset::Type type)
+{
+	return wxGetApp().get_tab(type)->m_presets->get_edited_preset();
 }
 
 wxString from_u8(const std::string &str)

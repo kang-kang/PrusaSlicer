@@ -1600,6 +1600,19 @@ void MainFrame::update_menubar()
     m_changeable_menu_items[miMaterialTab]  ->SetBitmap(create_menu_bitmap(is_fff ? "spool"   : "resin"));
 
     m_changeable_menu_items[miPrinterTab]   ->SetBitmap(create_menu_bitmap(is_fff ? "printer" : "sla_printer"));
+
+   
+}
+
+void MainFrame::update_line_sidetext(const std::string& line_name, const std::string& sidetext)
+{
+    if (Tab* tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(miMaterialTab))) {
+        if (Line* line = tab->get_line(line_name))
+        {
+            BOOST_LOG_TRIVIAL(error) << line->get_options()[0].opt.sidetext;
+            line->get_options()[0].opt.sidetext = sidetext;
+        }
+    }
 }
 
 #if 0

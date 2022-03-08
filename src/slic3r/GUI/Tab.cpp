@@ -1925,7 +1925,6 @@ void TabFilament::build()
         optgroup->append_single_option_line("filament_diameter");
         optgroup->append_single_option_line("extrusion_multiplier");
         optgroup->append_single_option_line("filament_density");
-        optgroup->append_single_option_line("filament_cost");
         optgroup->append_single_option_line("filament_spool_weight");
 
         optgroup->m_on_change = [this](t_config_option_key opt_key, boost::any value)
@@ -1950,6 +1949,14 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("first_layer_bed_temperature"));
         line.append_option(optgroup->get_option("bed_temperature"));
         optgroup->append_line(line);
+
+        optgroup = page->new_optgroup(L("Cost"));
+        Option option = optgroup->get_option("filament_cost");
+        option.opt.sidetext = format("%1%/kg", wxGetApp().app_config->get("currency_shortcut"));
+        optgroup->append_single_option_line(option);
+        option = optgroup->get_option("real_filament_cost");
+        option.opt.sidetext = format("%1%/kg", wxGetApp().app_config->get("currency_shortcut"));
+        optgroup->append_single_option_line(option);
 
     page = add_options_page(L("Cooling"), "cooling");
         std::string category_path = "cooling_127569#";
@@ -1983,7 +1990,7 @@ void TabFilament::build()
     page = add_options_page(L("Advanced"), "wrench");
         optgroup = page->new_optgroup(L("Filament properties"));
         // Set size as all another fields for a better alignment
-        Option option = optgroup->get_option("filament_type");
+        option = optgroup->get_option("filament_type");
         option.opt.width = Field::def_width();
         optgroup->append_single_option_line(option);
         optgroup->append_single_option_line("filament_soluble");
@@ -2136,6 +2143,11 @@ void TabFilament::toggle_options()
         for (auto el : { "min_fan_speed", "disable_fan_first_layers", "full_fan_speed_layer" })
             toggle_option(el, fan_always_on);
     }
+
+    if(Field* f = get_field("real_filament_cost"); f && !m_presets->get_edited_preset().is_system){
+        f->set_value(wxString("0"), false);
+    }
+    toggle_option("real_filament_cost", m_presets->get_edited_preset().is_system);
 
     if (m_active_page->title() == "Filament Overrides")
         update_filament_overrides_page();
@@ -3611,6 +3623,7 @@ void Tab::save_preset(std::string name /*= ""*/, bool detach)
     if (detach)
         update_ui_items_related_on_parent_preset(m_presets->get_selected_preset_parent());
 
+    toggle_options();
     update_changed_ui();
 
     /* If filament preset is saved for multi-material printer preset, 
