@@ -200,7 +200,7 @@ void PreferencesDialog::build()
 		else if (opt_key == "currency_shortcut") {
 			m_values[opt_key] = boost::any_cast<std::string>(value);
 			wxGetApp().mainframe->update_line_sidetext("filament_cost", format("%1%/kg", boost::any_cast<std::string>(value)));
-			wxGetApp().mainframe->update_line_sidetext("real_filament_cost", format("%1%/kg", boost::any_cast<std::string>(value)));
+			wxGetApp().mainframe->update_widget_sidetext("real_filament_cost", format("%1%/kg - "+ _("and some memo here"), boost::any_cast<std::string>(value)));
 		} else
 		    m_values[opt_key] = boost::any_cast<bool>(value) ? "1" : "0";
 	};

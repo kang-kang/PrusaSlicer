@@ -139,6 +139,7 @@ void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt
 			config.option<ConfigOptionFloats>(opt_key)->set_at(vec_new, opt_index, opt_index);
  			break;
 		}
+		/*
 		case coFloatAppConf:
 			//preset_type 0 is INVALID
 			if (preset_type == 0) {
@@ -148,6 +149,7 @@ void change_opt_value(DynamicPrintConfig& config, const t_config_option_key& opt
 			// dk: add controls to get_edited_preset?
 			get_app_config()->set(opt_key, get_edited_preset_const(Preset::Type(preset_type)).alias, boost::nowide::narrow(double_to_string(boost::any_cast<double>(value))));
 			break;
+		*/
 		case coString:
 			config.set_key_value(opt_key, new ConfigOptionString(boost::any_cast<std::string>(value)));
 			break;

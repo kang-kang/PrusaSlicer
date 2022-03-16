@@ -328,6 +328,23 @@ void OptionsSearcher::apply(DynamicPrintConfig* config, Preset::Type type, Confi
     search(search_line, true);
 }
 
+void OptionsSearcher::append_non_config_option(const GUI::Line& opt_line, Preset::Type type)
+{
+    wxString label = opt_line.label;
+    if (label.IsEmpty())
+        return;
+
+    std::string key = get_key(opt_line.get_options().front().opt_id, type);
+    const GroupAndCategory& gc = groups_and_categories[key];
+    if (gc.group.IsEmpty() || gc.category.IsEmpty())
+        return;
+
+    preferences_options.emplace_back(Search::Option{ boost::nowide::widen(key), type,
+                                label.ToStdWstring(), _(label).ToStdWstring(),
+                                gc.group.ToStdWstring(), _(gc.group).ToStdWstring(),
+                                gc.category.ToStdWstring(), _(gc.category).ToStdWstring() });
+}
+
 void OptionsSearcher::append_preferences_option(const GUI::Line& opt_line)
 {
     Preset::Type type = Preset::TYPE_PREFERENCES;

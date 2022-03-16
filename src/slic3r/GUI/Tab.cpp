@@ -1949,14 +1949,21 @@ void TabFilament::build()
         line.append_option(optgroup->get_option("first_layer_bed_temperature"));
         line.append_option(optgroup->get_option("bed_temperature"));
         optgroup->append_line(line);
-
+        
         optgroup = page->new_optgroup(L("Cost"));
+        
         Option option = optgroup->get_option("filament_cost");
         option.opt.sidetext = format("%1%/kg", wxGetApp().app_config->get("currency_shortcut"));
         optgroup->append_single_option_line(option);
-        option = optgroup->get_option("real_filament_cost");
-        option.opt.sidetext = format("%1%/kg", wxGetApp().app_config->get("currency_shortcut"));
-        optgroup->append_single_option_line(option);
+        // Next line is not affecting print config but app config
+        line = Line("real_filament_cost", L("Real Cost"), L("Description to tell, this is price for actual piece of filament, transfering to aliases."));
+        line.widget = [this](wxWindow* parent) {
+            return create_filament_cost_widget(parent);
+        };
+        // add key and append option. Both needs to be done here as this option is not in config.
+        wxGetApp().sidebar().get_searcher().add_key("real_filament_cost", static_cast<Preset::Type>(optgroup->config_type()), optgroup->title, optgroup->config_category());
+        wxGetApp().sidebar().get_searcher().append_non_config_option(line, Preset::Type::TYPE_FILAMENT);
+        optgroup->append_line(line);
 
     page = add_options_page(L("Cooling"), "cooling");
         std::string category_path = "cooling_127569#";
@@ -2112,6 +2119,65 @@ void TabFilament::update_volumetric_flow_preset_hints()
         text = _(L("Volumetric flow hints not available")) + "\n\n" + from_u8(ex.what());
     }
     m_volumetric_speed_description_line->SetText(text);
+}
+
+wxSizer* TabFilament::create_filament_cost_widget(wxWindow* parent)
+{
+    auto size = wxSize(8 * m_em_unit, wxDefaultCoord);
+    wxTextCtrl* txtctrl = new wxTextCtrl(parent, wxID_ANY, "0", wxDefaultPosition, size, wxTE_PROCESS_ENTER | wxBORDER_SIMPLE);
+
+    txtctrl->SetFont(Slic3r::GUI::wxGetApp().normal_font());
+    wxGetApp().UpdateDarkUI(txtctrl);
+
+    if (!wxOSX)
+        // Only disable background refresh for single line input fields, as they are completely painted over by the edit control.
+        // This does not apply to the multi-line edit field, where the last line and a narrow frame around the text is not cleared.
+        txtctrl->SetBackgroundStyle(wxBG_STYLE_PAINT);
+#ifdef __WXOSX__
+    txtctrl->OSXDisableAllSmartSubstitutions();
+#endif // __WXOSX__
+
+    std::string real_cost = wxGetApp().app_config->get("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias);
+    txtctrl->SetValue(real_cost.empty() ? wxString("0") : boost::nowide::widen(real_cost));
+
+    //txtctrl->SetToolTip(get_tooltip_text(text_value));
+
+    /*txtctrl->Bind(wxEVT_TEXT_ENTER, ([this, txtctrl](wxEvent& e)
+        {
+            //evt text enter
+            // wxEVT_ENTER_WINDOW - not correct event, change is with delay
+            // wxEVT_UPDATE_UI - triggers on every render
+            std::string real_cost = wxGetApp().app_config->get("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias);
+            txtctrl->SetValue(real_cost.empty() ? wxString("0") : boost::nowide::widen(real_cost));
+        }), txtctrl->GetId());
+        */
+    txtctrl->Bind(wxEVT_TEXT_ENTER, ([this, txtctrl](wxEvent& e)
+        {
+            std::string saved_val = wxGetApp().app_config->get("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias);
+            std::string curr_val = boost::nowide::narrow(txtctrl->GetValue());
+            if (saved_val != curr_val && (saved_val != "" || curr_val != "0"))
+                wxGetApp().app_config->set("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias, curr_val);
+
+        }), txtctrl->GetId());
+
+    txtctrl->Bind(wxEVT_KILL_FOCUS, ([this, txtctrl](wxFocusEvent& e)
+        {
+            e.Skip();
+            std::string saved_val = wxGetApp().app_config->get("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias);
+            std::string curr_val = boost::nowide::narrow(txtctrl->GetValue());
+            if (saved_val != curr_val && (saved_val != "" || curr_val != "0"))
+                wxGetApp().app_config->set("real_filament_cost", wxGetApp().preset_bundle->filaments.get_edited_preset().alias, curr_val);
+
+        }), txtctrl->GetId());
+
+    auto* label = new wxStaticText(parent, wxID_ANY, format("%1%/kg - " + _("and some memo here"), wxGetApp().app_config->get("currency_shortcut")));
+    label->SetFont(Slic3r::GUI::wxGetApp().normal_font());
+
+    auto sizer = new wxBoxSizer(wxHORIZONTAL);
+    sizer->Add(txtctrl, 0, wxALIGN_CENTER_VERTICAL);
+    sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL);
+
+    return sizer;
 }
 
 void TabFilament::update_description_lines()
@@ -3080,9 +3146,33 @@ void Tab::load_current_preset()
             on_preset_loaded();
         else
             wxGetApp().sidebar().update_objects_list_extruder_column(1);
+    } else if (m_type == Slic3r::Preset::TYPE_FILAMENT){
+        // For filaments, get alias value for user cost
+        if (Line* line = this->get_line("real_filament_cost")) {
+            
+
+            if (line->widget_sizer && line->widget_sizer->GetItemCount() > 0) {
+                wxSizerItem* item = line->widget_sizer->GetItem((size_t)0); // text control should be first item in sizer 
+                wxTextCtrl* txtctrl = dynamic_cast<wxTextCtrl*>(item->GetWindow());
+                if (txtctrl) {
+                    if (preset.is_system) {
+                        txtctrl->Enable();
+                        txtctrl->SetEditable(true);
+                        std::string real_cost = wxGetApp().app_config->get("real_filament_cost", preset.alias);
+                        txtctrl->SetValue(real_cost.empty() ? wxString("0") : boost::nowide::widen(real_cost));
+                    } else {
+                        txtctrl->Disable();
+                        txtctrl->SetEditable(false);
+                        txtctrl->SetValue(wxString("0"));
+                    }
+                    
+                }
+            }
+        }
     }
     // Reload preset pages with the new configuration values.
     reload_config();
+
 
     update_ui_items_related_on_parent_preset(m_presets->get_selected_preset_parent());
 

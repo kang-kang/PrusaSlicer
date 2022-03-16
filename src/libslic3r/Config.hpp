@@ -157,14 +157,14 @@ public:
 enum ConfigOptionType {
     coVectorType    = 0x4000,
     // Saves to appconfig instead of config
-    coAppConfigType = 0x0400,
+ //   coAppConfigType = 0x0400,
     coNone          = 0,
     // single float
     coFloat         = 1,
     // vector of floats
     coFloats        = coFloat + coVectorType,
     // float saving to appconfig, used for real filament cost
-    coFloatAppConf  = coFloat + coAppConfigType,
+//    coFloatAppConf  = coFloat + coAppConfigType,
     // single int
     coInt           = 2,
     // vector of ints

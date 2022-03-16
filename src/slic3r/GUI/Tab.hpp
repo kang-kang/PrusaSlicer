@@ -440,6 +440,7 @@ private:
     void            add_filament_overrides_page();
     void            update_filament_overrides_page();
 	void 			update_volumetric_flow_preset_hints();
+	wxSizer*		create_filament_cost_widget(wxWindow* parent);
 
     std::map<std::string, wxCheckBox*> m_overrides_options;
 public:

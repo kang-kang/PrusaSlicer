@@ -76,7 +76,7 @@ public:
 
 protected:
     typedef std::size_t Marker;
-    std::function<void(int)>    on_selection_changed { nullptr };
+    std::function<void(int)>    on_selection_changed{ nullptr };
 
     Preset::Type        m_type;
     std::string         m_main_bitmap_name;

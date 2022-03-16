@@ -117,6 +117,7 @@ public:
                ConfigOptionMode    mode);
     void append_preferences_option(const GUI::Line& opt_line);
     void append_preferences_options(const std::vector<GUI::Line>& opt_lines);
+    void append_non_config_option(const GUI::Line& opt_line, Preset::Type type);
     bool search();
     bool search(const std::string& search, bool force = false);
 

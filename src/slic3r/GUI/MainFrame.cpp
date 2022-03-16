@@ -1607,10 +1607,23 @@ void MainFrame::update_menubar()
 void MainFrame::update_line_sidetext(const std::string& line_name, const std::string& sidetext)
 {
     if (Tab* tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(miMaterialTab))) {
-        if (Line* line = tab->get_line(line_name))
-        {
-            BOOST_LOG_TRIVIAL(error) << line->get_options()[0].opt.sidetext;
+        if (Line* line = tab->get_line(line_name)) {
             line->get_options()[0].opt.sidetext = sidetext;
+            tab->update_dirty();
+        }
+    }
+}
+
+void MainFrame::update_widget_sidetext(const std::string& line_name, const std::string& sidetext)
+{
+    if (Tab* tab = dynamic_cast<Tab*>(m_tabpanel->GetPage(miMaterialTab))) { // Tohle nesmis pouzit miMaterialTab ale  Slic3r::Preset::TYPE_FILAMENT!
+        if (Line* line = tab->get_line(line_name)) {
+            if (line->widget_sizer && line->widget_sizer->GetItemCount() > 1) {
+                wxSizerItem* item = line->widget_sizer->GetItem(1); // sidetext should be second item in sizer 
+                wxStaticText* text = dynamic_cast<wxStaticText*>(item->GetWindow());
+                if (text)
+                    text->SetLabel(sidetext);
+            }  
         }
     }
 }

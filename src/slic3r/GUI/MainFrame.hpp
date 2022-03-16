@@ -163,6 +163,7 @@ public:
     void        open_menubar_item(const wxString& menu_name,const wxString& item_name);
 
     void         update_line_sidetext(const std::string& line_name, const std::string& sidetext);
+    void         update_widget_sidetext(const std::string& line_name, const std::string& sidetext);
 #ifdef _WIN32
     void        show_tabs_menu(bool show);
 #endif
