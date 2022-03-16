@@ -60,7 +60,6 @@ const t_field& OptionsGroup::build_field(const t_config_option_key& id, const Co
 			case coPercents:
 			case coString:
 			case coStrings:
- //           case coFloatAppConf:
                 m_fields.emplace(id, TextCtrl::Create<TextCtrl>(this->ctrl_parent(), opt, id));
                 break;
 			case coBool:
@@ -872,14 +871,6 @@ boost::any ConfigOptionsGroup::get_config_value(const DynamicPrintConfig& config
 		ret = double_to_string(val);
 		}
 		break;
-    /*
-    case coFloatAppConf:{
-        std::string alias = get_edited_preset_const((Preset::Type)m_config_type).alias;
-        std::string str = get_app_config()->get(opt_key, alias);
-        ret = str.empty() ? double_to_string(opt->get_default_value<ConfigOptionFloats>()->get_at(0)) : str;
-        }
-        break;
-    */
     case coString:
 		ret = from_u8(config.opt_string(opt_key));
 		break;

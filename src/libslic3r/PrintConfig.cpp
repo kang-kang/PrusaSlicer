@@ -1067,15 +1067,6 @@ void PrintConfigDef::init_fff_params()
     def->min = 0;
     def->set_default_value(new ConfigOptionFloats { 0. });
 
-   /*
-    def = this->add("real_filament_cost", coFloats);
-    def->label = L("Real Cost");
-    def->tooltip = L("Enter your current filament cost per kg here.");
-    def->sidetext = L("money/kg");
-    def->min = 0;
-    def->set_default_value(new ConfigOptionFloats{ 0. });
-    */
-
     def = this->add("filament_spool_weight", coFloats);
     def->label = L("Spool weight");
     def->tooltip = L("Enter weight of the empty filament spool. "

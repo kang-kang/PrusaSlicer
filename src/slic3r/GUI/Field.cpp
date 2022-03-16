@@ -92,7 +92,6 @@ void Field::PostInitialize()
 
 	switch (m_opt.type)
 	{
-//    case coFloatAppConf:
 	case coPercents:
 	case coFloats:
 	case coStrings:
@@ -210,7 +209,6 @@ void Field::get_value_by_opt_type(wxString& str, const bool check_value/* = true
 	case coInt:
 		m_value = wxAtoi(str);
 		break;
-//    case coFloatAppConf:
 	case coPercent:
 	case coPercents:
 	case coFloats:
@@ -451,12 +449,11 @@ void TextCtrl::BUILD() {
 		text_value += "%";
 		break;
 	}
-//    case coFloatAppConf:
 	case coPercents:
 	case coFloats:
 	case coFloat:
 	{
-		double val = m_opt.type == coFloats /* || m_opt.type == coFloatAppConf */ ?
+		double val = m_opt.type == coFloats ?
 			m_opt.get_default_value<ConfigOptionFloats>()->get_at(m_opt_idx) :
 			m_opt.type == coFloat ?
 				m_opt.default_value->getFloat() :
@@ -565,7 +562,6 @@ bool TextCtrl::value_was_changed()
     switch (m_opt.type) {
     case coInt:
         return boost::any_cast<int>(m_value) != boost::any_cast<int>(val);
-//    case coFloatAppConf:
     case coPercent:
     case coPercents:
     case coFloats:
