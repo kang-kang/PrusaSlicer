@@ -2286,18 +2286,18 @@ void TabFilament::update_filament_cost_visibility()
             //}
             
             
-            if (wxSizer* szr = optgrp->sizer)
-            {
-                //szr->ShowItems(false);
-                
-                wxSizerItem* item = szr->GetItem((size_t)0);
-                wxSizerItem* item1 = szr->GetItem((size_t)1);
-                wxSizerItem* item2 = szr->GetItem((size_t)2);
-                if (item)
-                    item->Show(false);
-                    
-               
-            }
+            //if (wxSizer* szr = optgrp->sizer)
+            //{
+            //    //szr->ShowItems(false);
+            //    
+            //    wxSizerItem* item = szr->GetItem((size_t)0);
+            //    wxSizerItem* item1 = szr->GetItem((size_t)1);
+            //    wxSizerItem* item2 = szr->GetItem((size_t)2);
+            //    if (item)
+            //        item->Show(false);
+            //        
+            //   
+            //}
            
         }
         
@@ -2326,6 +2326,17 @@ void TabFilament::update_filament_cost_visibility()
             }
         }
         */
+    }
+
+
+
+
+    if (ConfigOptionsGroupShp optgrp = this->m_active_page->get_optgroup(L"User Cost"); 
+        OG_CustomCtrl * ogcc = optgrp->custom_ctrl) {
+        if (Line* line = this->get_line("override_cost")) {
+            ogcc->force_hidden(*line, /*true*/!preset.is_system);
+        }
+        //BOOST_LOG_TRIVIAL(error) << "";
     }
 
 
