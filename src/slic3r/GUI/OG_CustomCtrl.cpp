@@ -105,6 +105,16 @@ int OG_CustomCtrl::get_height(const Line& line)
     return 0;
 }
 
+void OG_CustomCtrl::set_visibility(const Line& line, bool visible)
+{
+    for (CtrlLine& ctrl_line : ctrl_lines) {
+        if (&ctrl_line.og_line == &line) {
+            ctrl_line.is_visible = visible;
+            break;  
+        }
+    }
+}
+
 wxPoint OG_CustomCtrl::get_pos(const Line& line, Field* field_in/* = nullptr*/)
 {
     wxCoord v_pos = 0;
@@ -435,6 +445,8 @@ void OG_CustomCtrl::msw_rescale()
 void OG_CustomCtrl::sys_color_changed()
 {
 }
+
+
 
 OG_CustomCtrl::CtrlLine::CtrlLine(  wxCoord         height,
                                     OG_CustomCtrl*  ctrl,

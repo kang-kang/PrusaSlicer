@@ -102,6 +102,8 @@ public:
     wxPoint get_pos(const Line& line, Field* field = nullptr);
     int     get_height(const Line& line);
 
+    void    set_visibility(const Line& line, bool visible);
+
     OptionsGroup*  opt_group;
 
 };
